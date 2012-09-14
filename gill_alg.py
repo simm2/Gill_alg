@@ -1,27 +1,34 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-import math
+import math 
 
-#this is a helper function to test a value to see if its a list
-def RepresentsList(s):
-    try: 
-        list(s)
-        return True
-    except ValueError:
-        return False
+#this is a helper function to calclate the combinitorial function "N choose k"
+def choose(N,k):
+    C = math.factorial(N)/(math.factorial(N-k)*math.factorial(k))
+    return C
 
 # This function creates a placeholder for the arbitrary dictionary of reactions 
 # in our system that this program will simulate
 def ReactionList():
-    d = [[['Y_1']      ,['Y_2']            ,.01],
-         [['Y_1','Y_2'],['Z_1']            ,.05],
-         [['Y_1']      ,['Y_1','Y_1','Y_3'],.02],
-         [['Y_1','Y_1'],['Z_2']            ,.03],
-         [['Y_3','Y_2'],['Y_2']            ,.01]]
+    l = [[['Y_1']      ,['Y_2']            ,.01]]
+        # [['Y_1','Y_2'],['Z_1']            ,.1],
+        # [['Y_1']      ,['Y_1','Y_1','Y_3'],.1],
+        # [['Y_1','Y_1'],['Z_2']            ,.1],
+        # [['Y_3','Y_2'],['Y_2']            ,.1]]
+
+    return l
+
+# This is a placeholder for our initial population vector
+def PopulationVector():
+    d = {'Y_1':1000,
+         'Y_2':100,
+         'Y_3':100,
+         'Z_1':100,
+         'Z_2':100}
 
     return d
-
+    
 # This function retrieves the reaction rates from our dictionary and returns
 # them in a list that will become our reaction rate vector. It takes our
 # reaction rate dictionary as a parameter.
@@ -59,11 +66,24 @@ def calcN(Rlist):
 # Step 1)
 def calcMu(a_0,r_2,a_sum):
     s = 0
-    v = 1
+    v = int()
     while s < a_sum*r_2:
-        s = s + a_0['a_'+str(v)]
+        s = s + a_0[v]
         v = v + 1
-    return v-1
+    return v
+
+# This function calculates h_i for every species of reactants and stores them
+# to a list which the function returns. The function takes our reaction list
+# and our population dictionary as parameters 
+def calc_h(RList,X_i):
+    h_mu=[]
+    h_i = 1
+    for reactants,products,rate in RList:
+        for species in set(reactants):
+            h_i = h_i*choose(X_i[species],reactants.count(species))
+        h_mu.append(h_i)
+
+    return h_mu
 
 def main():
 
@@ -73,9 +93,9 @@ def main():
     # c_mu: the reaction constans for each defined reaction
     #       value is the average probability reaction mu will occur in the next
     #       infitesimal time period dt
-    c = Cmu(RList)
+    c_mu = Cmu(RList)
     # X_i: population of each reactant species
-    X_i = [1000,2000,3000,4000,5000,6000] #Method of input from outside module?
+    X_i = PopulationVector()
     # M: number of possible reactions in system
     M = calcM(RList)
     # N: number of molecule species in system
@@ -84,23 +104,22 @@ def main():
     pop = list()
     # time: the list of times when a defined reaction occurs
     time = list()
-    # dictionary used to store values in Step 2
-    a_0 = {'a_1':0}
-    # initial start time
+    # initial start time and reaction counter
     t = 0
+    counter = 0
 
 
     # define conditions for when algorithim is run
-    while X > 0:
+    while counter <= 1000:
         # Step 1: parameter calculation
         # update value of h
         # h: the number of distinct reactant combinations availible in the state
-        h = X
+        h_mu = calc_h(RList,X_i)
         # calculate each a_mu and take thier sum
         # a_mu:average probability reaction mu will occur given the curent state
         #      of the system
-        a_0['a_1'] = h * c
-        a_sum = sum(a_0.values())
+        a_0 = [c_mu[i]*h_mu[i] for i in range(M)]
+        a_sum = sum(a_0)
         # Step 2: Monte-Carlo simulation
         # generate r_1 and r_2
         r_1 = random.uniform(0,1)
@@ -116,13 +135,17 @@ def main():
         t = t + tau
         time.append(t)
         # update the population levels in the system
-        X = X - 1
-        pop.append(X)
+    
+        X_i['Y_1'] = X_i['Y_1'] - 1
+
+        pop.append(X_i['Y_1'])
+        counter += 1
 
     #test code here
-    print('c_mu =',c_mu)
-    print('M =',M)
+    print pop
+    print time
 
 
     
 print('loaded...')
+main()
