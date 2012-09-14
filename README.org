@@ -1,0 +1,2 @@
+This program is an implementation of Gillespie's exact stochastic
+simulation algorithim for arbitary reaction systems.
