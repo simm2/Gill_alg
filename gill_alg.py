@@ -1,18 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-import math 
+from math import *
 import operator as op
 
 #this is a helper function to calclate the combinitorial function "N choose k"
 
-def ncr(n, r):
-    r = min(r, n-r)
-    if r == 0: return n
-    num = reduce(op.mul, xrange(n, n-r, -1))
-    denom = reduce(op.mul, xrange(1, r+1))
-    return num//denom
-
+def ncr(n,r):
+    if r == 0:
+        return n
+    elif n == 0:
+        return 0
+    else:
+        return factorial(n)/(factorial(n-r)*factorial(r))
 # This function creates a placeholder for the arbitrary dictionary of reactions 
 # in our system that this program will simulate
 def ReactionList():
@@ -73,7 +73,6 @@ def calcMu(a_0,r_2,a_sum):
 # and our population dictionary as parameters 
 def calc_h(RList,X_i):
     h_mu=[]
-    
     for reactants,products,rate in RList:
         h_i = [ncr(X_i[species],reactants.count(species))
                                     for species in set(reactants)]
@@ -134,7 +133,7 @@ def main():
         r_2 = random.uniform(0,1)
         # calculate the continuous RV tau
         # tau: time till reaction mu that leads to the next system state
-        tau = (1/a_sum)*math.log(1/r_1)
+        tau = (1/a_sum)*log(1/r_1)
         # calculate the discrete RV mu
         # mu: the index number that identifies the reaction that occurs
         mu = calcMu(a_0,r_2,a_sum)
