@@ -11,26 +11,21 @@ def ncr(n,r):
         return n
     elif n == 0:
         return 0
+    elif r > n:
+        return 0
     else:
         return factorial(n)/(factorial(n-r)*factorial(r))
 # This function creates a placeholder for the arbitrary dictionary of reactions 
 # in our system that this program will simulate
 def ReactionList():
-    l = [[['Y_1']      ,['Y_2']            ,.01],
-         [['Y_1','Y_2'],['Z_1']            ,.1],
-         [['Y_1']      ,['Y_1','Y_1','Y_3'],.1],
-         [['Y_1','Y_1'],['Z_2']            ,.1],
-         [['Y_3','Y_2'],['Y_2']            ,.1]]
+    l = [[['x'],['c']    ,.05]]     
 
     return l
 
 # This is a placeholder for our initial population vector
 def PopulationVector():
-    d = {'Y_1':1000,
-         'Y_2':100,
-         'Y_3':100,
-         'Z_1':100,
-         'Z_2':100}
+    d = {'x':1000,
+         'c':0,}
 
     return d
     
@@ -79,18 +74,7 @@ def calc_h(RList,X_i):
         h_mu.append(reduce(op.mul,h_i))
     return h_mu
 
-# this funtion updates the population vector in Step 3. It takes the discrete
-# RV mu to select the reaction that occurs and adds/ subtracts from the
-# latest population vector acordingly
-def updatePop(RList,mu,X_i):
-    reaction = RList[mu-1]
-    for reactants in reaction[0]:
-        X_i[reactants] -= 1
-    for products in reaction[1]:
-        X_i[products] += 1
-
-    return X_i
-
+     
 
 def main():
 
@@ -116,6 +100,7 @@ def main():
     counter = 0
 
 
+
     # define conditions for when algorithim is run
     while counter <= 1000:
         # Step 1: parameter calculation
@@ -127,6 +112,10 @@ def main():
         #      of the system
         a_0 = [c_mu[i]*h_mu[i] for i in range(M)]
         a_sum = sum(a_0)
+        # When a_sum is 0 there is no posible reaction that can occour in the
+        # System. When this occours, end the algorithim here
+        if a_sum == 0:
+            break
         # Step 2: Monte-Carlo simulation
         # generate r_1 and r_2
         r_1 = random.uniform(0,1)
@@ -142,14 +131,25 @@ def main():
         t = t + tau
         time.append(t)
         # update the population levels in the system and add them to the list
-        X_i = updatePop(RList,mu,X_i)
-        pop.append(X_i)
+        reaction = RList[mu-1]
+        for reactants in reaction[0]:
+            X_i[reactants] -= 1
+        for products in reaction[1]:
+            X_i[products] += 1
+            
+        
+    
+        
+
+        
         #reaction counter increases
         counter += 1
 
     #test code here
+    
     print pop
-    print time
+    x = [X_i['x'] for X_i in pop]
+    
 
 
     
