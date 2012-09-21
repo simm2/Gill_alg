@@ -2,20 +2,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import math 
+import operator as op
 
 #this is a helper function to calclate the combinitorial function "N choose k"
-def choose(N,k):
-    C = math.factorial(N)/(math.factorial(N-k)*math.factorial(k))
-    return C
+
+def ncr(n, r):
+    r = min(r, n-r)
+    if r == 0: return n
+    num = reduce(op.mul, xrange(n, n-r, -1))
+    denom = reduce(op.mul, xrange(1, r+1))
+    return num//denom
 
 # This function creates a placeholder for the arbitrary dictionary of reactions 
 # in our system that this program will simulate
 def ReactionList():
-    l = [[['Y_1']      ,['Y_2']            ,.01]]
-        # [['Y_1','Y_2'],['Z_1']            ,.1],
-        # [['Y_1']      ,['Y_1','Y_1','Y_3'],.1],
-        # [['Y_1','Y_1'],['Z_2']            ,.1],
-        # [['Y_3','Y_2'],['Y_2']            ,.1]]
+    l = [[['Y_1']      ,['Y_2']            ,.01],
+         [['Y_1','Y_2'],['Z_1']            ,.1],
+         [['Y_1']      ,['Y_1','Y_1','Y_3'],.1],
+         [['Y_1','Y_1'],['Z_2']            ,.1],
+         [['Y_3','Y_2'],['Y_2']            ,.1]]
 
     return l
 
@@ -77,12 +82,11 @@ def calcMu(a_0,r_2,a_sum):
 # and our population dictionary as parameters 
 def calc_h(RList,X_i):
     h_mu=[]
-    h_i = 1
+    
     for reactants,products,rate in RList:
-        for species in set(reactants):
-            h_i = h_i*choose(X_i[species],reactants.count(species))
-        h_mu.append(h_i)
-
+        h_i = [ncr(X_i[species],reactants.count(species))
+                                    for species in set(reactants)]
+        h_mu.append(reduce(op.mul,h_i))
     return h_mu
 
 def main():
