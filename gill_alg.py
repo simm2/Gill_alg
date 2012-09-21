@@ -49,15 +49,6 @@ def calcM(RList):
     M = len(RList)
     return M
 
-# This function returns the number of molecule species in our dictionary
-# def calcN(RList):-
-#     N = 0
-#     for reactants,products,rate in RList:
-#         Nlist = reactants+products
-#             p = set(l)
-#             for v in p:
-#                 N += 1
-#     return N
 
 def calcN(Rlist):
     species = sum([reactants + products 
@@ -88,6 +79,19 @@ def calc_h(RList,X_i):
                                     for species in set(reactants)]
         h_mu.append(reduce(op.mul,h_i))
     return h_mu
+
+# this funtion updates the population vector in Step 3. It takes the discrete
+# RV mu to select the reaction that occurs and adds/ subtracts from the
+# latest population vector acordingly
+def updatePop(RList,mu,X_i):
+    reaction = RList[mu-1]
+    for reactants in reaction[0]:
+        X_i[reactants] -= 1
+    for products in reaction[1]:
+        X_i[products] += 1
+
+    return X_i
+
 
 def main():
 
@@ -138,11 +142,10 @@ def main():
         # update the system time and add to the list
         t = t + tau
         time.append(t)
-        # update the population levels in the system
-    
-        X_i['Y_1'] = X_i['Y_1'] - 1
-
-        pop.append(X_i['Y_1'])
+        # update the population levels in the system and add them to the list
+        X_i = updatePop(RList,mu,X_i)
+        pop.append(X_i)
+        #reaction counter increases
         counter += 1
 
     #test code here
@@ -152,4 +155,5 @@ def main():
 
     
 print('loaded...')
+
 main()
