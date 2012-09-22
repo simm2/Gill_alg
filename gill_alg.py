@@ -136,6 +136,8 @@ def main():
             X_i[reactants] -= 1
         for products in reaction[1]:
             X_i[products] += 1
+
+        pop.append(dict(X_i))
             
         
     
@@ -146,9 +148,13 @@ def main():
         counter += 1
 
     #test code here
-    
-    print pop
     x = [X_i['x'] for X_i in pop]
+
+    
+    plt.plot(time,x)
+
+    plt.show()
+   
     
 
 
